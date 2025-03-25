@@ -75,9 +75,11 @@ test {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name + '-java11'
+            version project.version
             from components.java
-            artifact sourcesJar
         }
     }
 }
