@@ -19,7 +19,18 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
-public record Const(Type<?> type) implements TypeTemplate {
+public final class Const implements TypeTemplate {
+
+    private final Type<?> type;
+
+    public Const(Type<?> type) {
+        this.type = type;
+    }
+
+    public Type<?> type() {
+        return type;
+    }
+
     @Override
     public int size() {
         return 0;

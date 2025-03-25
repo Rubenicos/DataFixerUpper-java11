@@ -21,7 +21,30 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public record Check(String name, int index, TypeTemplate element) implements TypeTemplate {
+public final class Check implements TypeTemplate {
+
+    private final String name;
+    private final int index;
+    private final TypeTemplate element;
+
+    public Check(String name, int index, TypeTemplate element) {
+        this.name = name;
+        this.index = index;
+        this.element = element;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public int index() {
+        return index;
+    }
+
+    public TypeTemplate element() {
+        return element;
+    }
+
     @Override
     public int size() {
         return Math.max(index + 1, element.size());

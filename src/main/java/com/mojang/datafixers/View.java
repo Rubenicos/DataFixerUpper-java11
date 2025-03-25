@@ -14,8 +14,18 @@ import com.mojang.serialization.DynamicOps;
 import java.util.Optional;
 import java.util.function.Function;
 
-public record View<A, B>(PointFree<Function<A, B>> function) implements App2<View.Mu, A, B> {
+public final class View<A, B> implements App2<View.Mu, A, B> {
     static final class Mu implements K2 {}
+
+    private final PointFree<Function<A, B>> function;
+
+    public View(PointFree<Function<A, B>> function) {
+        this.function = function;
+    }
+
+    public PointFree<Function<A, B>> function() {
+        return function;
+    }
 
     static <A, B> View<A, B> unbox(final App2<Mu, A, B> box) {
         return (View<A, B>) box;

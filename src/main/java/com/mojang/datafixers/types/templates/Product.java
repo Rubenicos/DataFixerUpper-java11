@@ -30,7 +30,24 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public record Product(TypeTemplate f, TypeTemplate g) implements TypeTemplate {
+public final class Product implements TypeTemplate {
+
+    private final TypeTemplate f;
+    private final TypeTemplate g;
+
+    public Product(TypeTemplate f, TypeTemplate g) {
+        this.f = f;
+        this.g = g;
+    }
+
+    public TypeTemplate f() {
+        return f;
+    }
+
+    public TypeTemplate g() {
+        return g;
+    }
+
     @Override
     public int size() {
         return Math.max(f.size(), g.size());

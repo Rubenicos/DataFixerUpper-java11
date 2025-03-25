@@ -22,7 +22,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public record Hook(TypeTemplate element, HookFunction preRead, HookFunction postWrite) implements TypeTemplate {
+public final class Hook implements TypeTemplate {
+
     public interface HookFunction {
         HookFunction IDENTITY = new HookFunction() {
             @Override
@@ -32,6 +33,28 @@ public record Hook(TypeTemplate element, HookFunction preRead, HookFunction post
         };
 
         <T> T apply(final DynamicOps<T> ops, final T value);
+    }
+
+    private final TypeTemplate element;
+    private final HookFunction preRead;
+    private final HookFunction postWrite;
+
+    public Hook(TypeTemplate element, HookFunction preRead, HookFunction postWrite) {
+        this.element = element;
+        this.preRead = preRead;
+        this.postWrite = postWrite;
+    }
+
+    public TypeTemplate element() {
+        return element;
+    }
+
+    public HookFunction preRead() {
+        return preRead;
+    }
+
+    public HookFunction postWrite() {
+        return postWrite;
     }
 
     @Override

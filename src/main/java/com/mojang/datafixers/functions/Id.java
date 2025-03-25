@@ -21,7 +21,7 @@ final class Id<A> extends PointFree<Function<A, A>> {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Id<?> id && type.equals(id.type);
+        return obj instanceof Id<?> && type.equals(((Id<?>) obj).type);
     }
 
     @Override

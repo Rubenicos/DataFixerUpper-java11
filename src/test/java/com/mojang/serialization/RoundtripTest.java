@@ -43,8 +43,18 @@ public class RoundtripTest {
         Day type();
     }
 
-    private record TuesdayData(int x) implements DayData {
+    private static final class TuesdayData implements DayData {
         public static final MapCodec<TuesdayData> CODEC = Codec.INT.xmap(TuesdayData::new, d -> d.x).fieldOf("value");
+
+        private final int x;
+
+        private TuesdayData(int x) {
+            this.x = x;
+        }
+
+        public int x() {
+            return x;
+        }
 
         @Override
         public Day type() {
@@ -52,8 +62,18 @@ public class RoundtripTest {
         }
     }
 
-    private record WednesdayData(String y) implements DayData {
+    private static final class WednesdayData implements DayData {
         public static final MapCodec<WednesdayData> CODEC = Codec.STRING.xmap(WednesdayData::new, d -> d.y).fieldOf("value");
+
+        private final String y;
+
+        private WednesdayData(String y) {
+            this.y = y;
+        }
+
+        public String y() {
+            return y;
+        }
 
         @Override
         public Day type() {
@@ -61,8 +81,18 @@ public class RoundtripTest {
         }
     }
 
-    private record SundayData(float z) implements DayData {
+    private static final class SundayData implements DayData {
         public static final MapCodec<SundayData> CODEC = Codec.FLOAT.xmap(SundayData::new, d -> d.z).fieldOf("value");
+
+        private final float z;
+
+        private SundayData(float z) {
+            this.z = z;
+        }
+
+        public float z() {
+            return z;
+        }
 
         @Override
         public Day type() {
@@ -70,20 +100,7 @@ public class RoundtripTest {
         }
     }
 
-    private record TestData(
-        float a,
-        double b,
-        byte c,
-        short d,
-        int e,
-        long f,
-        boolean g,
-        String h,
-        List<String> i,
-        Map<String, String> j,
-        List<Pair<String, String>> k,
-        DayData dayData
-    ) {
+    private static final class TestData {
         public static final Codec<TestData> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.FLOAT.fieldOf("a").forGetter(d -> d.a),
             Codec.DOUBLE.fieldOf("b").forGetter(d -> d.b),
@@ -98,6 +115,82 @@ public class RoundtripTest {
             Codec.compoundList(Codec.STRING, Codec.STRING).fieldOf("k").forGetter(d -> d.k),
             DayData.CODEC.fieldOf("day_data").forGetter(d -> d.dayData)
         ).apply(i, TestData::new));
+
+        private final float a;
+        private final double b;
+        private final byte c;
+        private final short d;
+        private final int e;
+        private final long f;
+        private final boolean g;
+        private final String h;
+        private final List<String> i;
+        private final Map<String, String> j;
+        private final List<Pair<String, String>> k;
+        private final DayData dayData;
+
+        private TestData(float a, double b, byte c, short d, int e, long f, boolean g, String h, List<String> i, Map<String, String> j, List<Pair<String, String>> k, DayData dayData) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.e = e;
+            this.f = f;
+            this.g = g;
+            this.h = h;
+            this.i = i;
+            this.j = j;
+            this.k = k;
+            this.dayData = dayData;
+        }
+
+        public float a() {
+            return a;
+        }
+
+        public double b() {
+            return b;
+        }
+
+        public byte c() {
+            return c;
+        }
+
+        public short d() {
+            return d;
+        }
+
+        public int e() {
+            return e;
+        }
+
+        public long f() {
+            return f;
+        }
+
+        public boolean g() {
+            return g;
+        }
+
+        public String h() {
+            return h;
+        }
+
+        public List<String> i() {
+            return i;
+        }
+
+        public Map<String, String> j() {
+            return j;
+        }
+
+        public List<Pair<String, String>> k() {
+            return k;
+        }
+
+        public DayData dayData() {
+            return dayData;
+        }
     }
 
     private static TestData makeRandomTestData() {

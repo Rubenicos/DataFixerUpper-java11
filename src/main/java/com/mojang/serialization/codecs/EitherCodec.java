@@ -8,7 +8,24 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 
-public record EitherCodec<F, S>(Codec<F> first, Codec<S> second) implements Codec<Either<F, S>> {
+public final class EitherCodec<F, S> implements Codec<Either<F, S>> {
+
+    private final Codec<F> first;
+    private final Codec<S> second;
+
+    public EitherCodec(Codec<F> first, Codec<S> second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public Codec<F> first() {
+        return first;
+    }
+
+    public Codec<S> second() {
+        return second;
+    }
+
     @Override
     public <T> DataResult<Pair<Either<F, S>, T>> decode(final DynamicOps<T> ops, final T input) {
         final DataResult<Pair<Either<F, S>, T>> firstRead = first.decode(ops, input).map(vo -> vo.mapFirst(Either::left));

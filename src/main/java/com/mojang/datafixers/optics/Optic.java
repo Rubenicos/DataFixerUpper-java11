@@ -9,7 +9,6 @@ import com.mojang.datafixers.kinds.K1;
 import com.mojang.datafixers.kinds.K2;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +18,18 @@ import java.util.stream.Collectors;
 public interface Optic<Proof extends K1, S, T, A, B> {
     <P extends K2> Function<App2<P, A, B>, App2<P, S, T>> eval(final App<? extends Proof, P> proof);
 
-    record CompositionOptic<Proof extends K1, S, T, A, B>(List<? extends Optic<? super Proof, ?, ?, ?, ?>> optics) implements Optic<Proof, S, T, A, B> {
+    final class CompositionOptic<Proof extends K1, S, T, A, B> implements Optic<Proof, S, T, A, B> {
+
+        private final List<? extends Optic<? super Proof, ?, ?, ?, ?>> optics;
+
+        public CompositionOptic(List<? extends Optic<? super Proof, ?, ?, ?, ?>> optics) {
+            this.optics = optics;
+        }
+
+        public List<? extends Optic<? super Proof, ?, ?, ?, ?>> optics() {
+            return optics;
+        }
+
         @Override
         @SuppressWarnings("unchecked")
         public <P extends K2> Function<App2<P, A, B>, App2<P, S, T>> eval(final App<? extends Proof, P> proof) {

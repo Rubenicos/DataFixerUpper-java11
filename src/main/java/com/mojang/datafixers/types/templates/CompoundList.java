@@ -25,7 +25,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public record CompoundList(TypeTemplate key, TypeTemplate element) implements TypeTemplate {
+public final class CompoundList implements TypeTemplate {
+
+    private final TypeTemplate key;
+    private final TypeTemplate element;
+
+    public CompoundList(TypeTemplate key, TypeTemplate element) {
+        this.key = key;
+        this.element = element;
+    }
+
+    public TypeTemplate key() {
+        return key;
+    }
+
+    public TypeTemplate element() {
+        return element;
+    }
+
     @Override
     public int size() {
         return Math.max(key.size(), element.size());

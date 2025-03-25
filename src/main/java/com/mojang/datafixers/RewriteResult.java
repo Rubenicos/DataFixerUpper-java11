@@ -8,7 +8,24 @@ import com.mojang.datafixers.types.templates.RecursivePoint;
 import java.util.BitSet;
 import java.util.Objects;
 
-public record RewriteResult<A, B>(View<A, B> view, BitSet recData) {
+public final class RewriteResult<A, B> {
+
+    private final View<A, B> view;
+    private final BitSet recData;
+
+    public RewriteResult(View<A, B> view, BitSet recData) {
+        this.view = view;
+        this.recData = recData;
+    }
+
+    public View<A, B> view() {
+        return view;
+    }
+
+    public BitSet recData() {
+        return recData;
+    }
+
     public static <A, B> RewriteResult<A, B> create(final View<A, B> view, final BitSet recData) {
         return new RewriteResult<>(view, recData);
     }

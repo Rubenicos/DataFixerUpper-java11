@@ -31,13 +31,30 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record TypedOptic<S, T, A, B>(Set<TypeToken<? extends K1>> bounds, List<? extends Element<?, ?, ?, ?>> elements) {
+public final class TypedOptic<S, T, A, B> {
+
+    private final Set<TypeToken<? extends K1>> bounds;
+    private final List<? extends Element<?, ?, ?, ?>> elements;
+
     public TypedOptic(final TypeToken<? extends K1> proofBound, final Type<S> sType, final Type<T> tType, final Type<A> aType, final Type<B> bType, final Optic<?, S, T, A, B> optic) {
         this(ImmutableSet.of(proofBound), sType, tType, aType, bType, optic);
     }
 
     public TypedOptic(final Set<TypeToken<? extends K1>> proofBounds, final Type<S> sType, final Type<T> tType, final Type<A> aType, final Type<B> bType, final Optic<?, S, T, A, B> optic) {
         this(proofBounds, List.of(new Element<>(sType, tType, aType, bType, optic)));
+    }
+
+    public TypedOptic(Set<TypeToken<? extends K1>> bounds, List<? extends Element<?, ?, ?, ?>> elements) {
+        this.bounds = bounds;
+        this.elements = elements;
+    }
+
+    public Set<TypeToken<? extends K1>> bounds() {
+        return bounds;
+    }
+
+    public List<? extends Element<?, ?, ?, ?>> elements() {
+        return elements;
     }
 
     public <P extends K2, Proof2 extends K1> App2<P, S, T> apply(final TypeToken<Proof2> token, final App<Proof2, P> proof, final App2<P, A, B> argument) {
@@ -249,13 +266,42 @@ public record TypedOptic<S, T, A, B>(Set<TypeToken<? extends K1>> bounds, List<?
         return "(" + elements.stream().map(Object::toString).collect(Collectors.joining(" \u25E6 ")) + ")";
     }
 
-    public record Element<S, T, A, B>(
-        Type<S> sType,
-        Type<T> tType,
-        Type<A> aType,
-        Type<B> bType,
-        Optic<?, S, T, A, B> optic
-    ) {
+    public static final class Element<S, T, A, B> {
+
+        private final Type<S> sType;
+        private final Type<T> tType;
+        private final Type<A> aType;
+        private final Type<B> bType;
+        private final Optic<?, S, T, A, B> optic;
+
+        public Element(Type<S> sType, Type<T> tType, Type<A> aType, Type<B> bType, Optic<?, S, T, A, B> optic) {
+            this.sType = sType;
+            this.tType = tType;
+            this.aType = aType;
+            this.bType = bType;
+            this.optic = optic;
+        }
+
+        public Type<S> sType() {
+            return sType;
+        }
+
+        public Type<T> tType() {
+            return tType;
+        }
+
+        public Type<A> aType() {
+            return aType;
+        }
+
+        public Type<B> bType() {
+            return bType;
+        }
+
+        public Optic<?, S, T, A, B> optic() {
+            return optic;
+        }
+
         @SuppressWarnings("unchecked")
         public <S2, T2> Element<S2, T2, A, B> castOuterUnchecked(final Type<S2> sType, final Type<T2> tType) {
             return new Element<>(sType, tType, aType, bType, (Optic<?, S2, T2, A, B>) optic);

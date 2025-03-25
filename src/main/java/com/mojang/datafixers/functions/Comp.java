@@ -57,8 +57,8 @@ final class Comp<A, B> extends PointFree<Function<A, B>> {
             final PointFree<? extends Function<?, ?>> rewrite = rule.rewriteOrNop(function);
             if (rewrite != function) {
                 rewritten = true;
-                if (rewrite instanceof Comp<?, ?> comp) {
-                    Collections.addAll(newFunctions, comp.functions);
+                if (rewrite instanceof Comp<?, ?>) {
+                    Collections.addAll(newFunctions, ((Comp<?, ?>) rewrite).functions);
                 } else {
                     newFunctions.add(rewrite);
                 }
@@ -76,7 +76,8 @@ final class Comp<A, B> extends PointFree<Function<A, B>> {
             final PointFree<? extends Function<?, ?>> function = functions[i];
             final Optional<? extends PointFree<? extends Function<?, ?>>> rewrite = rule.rewrite(function);
             if (rewrite.isPresent()) {
-                if (rewrite.get() instanceof Comp<?, ?> comp) {
+                if (rewrite.get() instanceof Comp<?, ?>) {
+                    final Comp<?, ?> comp = (Comp<?, ?>) rewrite.get();
                     final PointFree<? extends Function<?, ?>>[] newFunctions = new PointFree[functions.length - 1 + comp.functions.length];
                     System.arraycopy(functions, 0, newFunctions, 0, i);
                     System.arraycopy(comp.functions, 0, newFunctions, i, comp.functions.length);

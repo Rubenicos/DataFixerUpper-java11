@@ -17,10 +17,24 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record DispatchedMapCodec<K, V>(
-    Codec<K> keyCodec,
-    Function<K, Codec<? extends V>> valueCodecFunction
-) implements Codec<Map<K, V>> {
+public final class DispatchedMapCodec<K, V> implements Codec<Map<K, V>> {
+
+    private final Codec<K> keyCodec;
+    private final Function<K, Codec<? extends V>> valueCodecFunction;
+
+    public DispatchedMapCodec(Codec<K> keyCodec, Function<K, Codec<? extends V>> valueCodecFunction) {
+        this.keyCodec = keyCodec;
+        this.valueCodecFunction = valueCodecFunction;
+    }
+
+    public Codec<K> keyCodec() {
+        return keyCodec;
+    }
+
+    public Function<K, Codec<? extends V>> valueCodecFunction() {
+        return valueCodecFunction;
+    }
+
     @Override
     public <T> DataResult<T> encode(final Map<K, V> input, final DynamicOps<T> ops, final T prefix) {
         final RecordBuilder<T> mapBuilder = ops.mapBuilder();

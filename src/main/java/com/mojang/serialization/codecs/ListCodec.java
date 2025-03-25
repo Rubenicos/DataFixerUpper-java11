@@ -14,7 +14,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record ListCodec<E>(Codec<E> elementCodec, int minSize, int maxSize) implements Codec<List<E>> {
+public final class ListCodec<E> implements Codec<List<E>> {
+
+    private final Codec<E> elementCodec;
+    private final int minSize;
+    private final int maxSize;
+
+    public ListCodec(Codec<E> elementCodec, int minSize, int maxSize) {
+        this.elementCodec = elementCodec;
+        this.minSize = minSize;
+        this.maxSize = maxSize;
+    }
+
+    public Codec<E> elementCodec() {
+        return elementCodec;
+    }
+
+    public int minSize() {
+        return minSize;
+    }
+
+    public int maxSize() {
+        return maxSize;
+    }
+
     private <R> DataResult<R> createTooShortError(final int size) {
         return DataResult.error(() -> "List is too short: " + size + ", expected range [" + minSize + "-" + maxSize + "]");
     }
@@ -52,9 +75,9 @@ public record ListCodec<E>(Codec<E> elementCodec, int minSize, int maxSize) impl
         return "ListCodec[" + elementCodec + ']';
     }
 
-    private class DecoderState<T> {
-        private static final DataResult<Unit> INITIAL_RESULT = DataResult.success(Unit.INSTANCE, Lifecycle.stable());
+    private static final DataResult<Unit> INITIAL_RESULT = DataResult.success(Unit.INSTANCE, Lifecycle.stable());
 
+    private class DecoderState<T> {
         private final DynamicOps<T> ops;
         private final List<E> elements = new ArrayList<>();
         private final Stream.Builder<T> failed = Stream.builder();

@@ -21,7 +21,18 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public record List(TypeTemplate element) implements TypeTemplate {
+public final class List implements TypeTemplate {
+
+    private final TypeTemplate element;
+
+    public List(TypeTemplate element) {
+        this.element = element;
+    }
+
+    public TypeTemplate element() {
+        return element;
+    }
+
     @Override
     public int size() {
         return element.size();
@@ -65,7 +76,7 @@ public record List(TypeTemplate element) implements TypeTemplate {
 
     @Override
     public <FT, FR> Either<TypeTemplate, Type.FieldNotFoundException> findFieldOrType(final int index, @Nullable final String name, final Type<FT> type, final Type<FR> resultType) {
-        return element.findFieldOrType(index, name, type, resultType).mapLeft(List::new);
+        return element.findFieldOrType(index, name, type, resultType).mapLeft((TypeTemplate t) -> new List(t));
     }
 
     @Override

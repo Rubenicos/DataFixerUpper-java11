@@ -3,7 +3,7 @@ apply plugin: 'maven-publish'
 
 group = 'com.mojang'
 version = project.hasProperty('buildNumber') ? "${project.majorMinor}.${project.buildNumber}" : "${project.majorMinor}.0-SNAPSHOT"
-def javaMajorVersion = project.hasProperty('javaMajorVersion') ? "${project.javaMajorVersion}" : "17"
+def javaMajorVersion = project.hasProperty('javaMajorVersion') ? "${project.javaMajorVersion}" : "11"
 
 sourceCompatibility = "${javaMajorVersion}"
 targetCompatibility = "${javaMajorVersion}"

@@ -24,7 +24,24 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public record Named(String name, TypeTemplate element) implements TypeTemplate {
+public final class Named implements TypeTemplate {
+
+    private final String name;
+    private final TypeTemplate element;
+
+    public Named(String name, TypeTemplate element) {
+        this.name = name;
+        this.element = element;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public TypeTemplate element() {
+        return element;
+    }
+
     @Override
     public int size() {
         return element.size();

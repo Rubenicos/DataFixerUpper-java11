@@ -325,13 +325,29 @@ public class CodecTests {
         assertRoundTrip(codec, "STRING", "STRING");
     }
 
-    private record Node(String value, Optional<Node> next) {
+    private static final class Node {
         public static final Codec<Node> CODEC = Codec.recursive("Node", self ->
             RecordCodecBuilder.create(i -> i.group(
                 Codec.STRING.fieldOf("value").forGetter(o -> o.value),
                 self.optionalFieldOf("next").forGetter(o -> o.next)
             ).apply(i, Node::new))
         );
+
+        private final String value;
+        private final Optional<Node> next;
+
+        private Node(String value, Optional<Node> next) {
+            this.value = value;
+            this.next = next;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        public Optional<Node> next() {
+            return next;
+        }
 
         public void toList(final List<String> output) {
             output.add(value);
@@ -375,10 +391,20 @@ public class CodecTests {
         Node.assertParsingEquals(List.of("a", "b", "c"), Map.of("value", "a", "next", Map.of("value", "b", "next", Map.of("value", "c"))));
     }
 
-    private record Left(Optional<Right> next) {
+    private static final class Left {
         private static final Codec<Left> CODEC = RecordCodecBuilder.create(i -> i.group(
             Right.CODEC.optionalFieldOf("next").forGetter(o -> o.next)
         ).apply(i, Left::new));
+
+        private final Optional<Right> next;
+
+        private Left(Optional<Right> next) {
+            this.next = next;
+        }
+
+        public Optional<Right> next() {
+            return next;
+        }
 
         public int count() {
             return 1 + next.map(Right::depth).orElse(0);
@@ -389,12 +415,22 @@ public class CodecTests {
         }
     }
 
-    private record Right(Optional<Left> next) {
+    private static final class Right {
         private static final Codec<Right> CODEC = Codec.recursive("Right", self ->
             RecordCodecBuilder.create(i -> i.group(
                 Left.CODEC.optionalFieldOf("next").forGetter(o -> o.next)
             ).apply(i, Right::new))
         );
+
+        private final Optional<Left> next;
+
+        private Right(Optional<Left> next) {
+            this.next = next;
+        }
+
+        public Optional<Left> next() {
+            return next;
+        }
 
         public int depth() {
             return 1 + next.map(Left::count).orElse(0);
@@ -438,14 +474,25 @@ public class CodecTests {
         ;
 
         public static final Codec<Variant> CODEC = Codec.stringResolver(
-            variant -> switch (variant) {
-                case FOO -> "foo";
-                case BAR -> "bar";
+            variant -> {
+                switch (variant) {
+                    case FOO:
+                        return "foo";
+                    case BAR:
+                        return "bar";
+                    default:
+                        throw new IllegalArgumentException();
+                }
             },
-            string -> switch (string) {
-                case "foo" -> FOO;
-                case "bar" -> BAR;
-                default -> null;
+            string -> {
+                switch (string) {
+                    case "foo":
+                        return FOO;
+                    case "bar":
+                        return BAR;
+                    default:
+                        return null;
+                }
             }
         );
     }
@@ -601,10 +648,7 @@ public class CodecTests {
         );
     }
 
-    private record SimpleOptionals(
-        Optional<String> string,
-        Optional<Integer> integer
-    ) {
+    private static final class SimpleOptionals {
         public static final Codec<SimpleOptionals> STRICT_CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.optionalFieldOf("string").forGetter(SimpleOptionals::string),
             Codec.INT.optionalFieldOf("integer").forGetter(SimpleOptionals::integer)
@@ -614,6 +658,22 @@ public class CodecTests {
             Codec.STRING.lenientOptionalFieldOf("string").forGetter(SimpleOptionals::string),
             Codec.INT.lenientOptionalFieldOf("integer").forGetter(SimpleOptionals::integer)
         ).apply(i, SimpleOptionals::new));
+
+        private final Optional<String> string;
+        private final Optional<Integer> integer;
+
+        private SimpleOptionals(Optional<String> string, Optional<Integer> integer) {
+            this.string = string;
+            this.integer = integer;
+        }
+
+        public Optional<String> string() {
+            return string;
+        }
+
+        public Optional<Integer> integer() {
+            return integer;
+        }
     }
 
     @Test
@@ -669,9 +729,7 @@ public class CodecTests {
         );
     }
 
-    private record NestedStrictOptionals(
-        Optional<SimpleOptionals> nested
-    ) {
+    private static final class NestedStrictOptionals {
         public static final Codec<NestedStrictOptionals> TOP_LEVEL_STRICT_CODEC = RecordCodecBuilder.create(i -> i.group(
             SimpleOptionals.STRICT_CODEC.optionalFieldOf("nested").forGetter(NestedStrictOptionals::nested)
         ).apply(i, NestedStrictOptionals::new));
@@ -679,6 +737,16 @@ public class CodecTests {
         public static final Codec<NestedStrictOptionals> TOP_LEVEL_LENIENT_CODEC = RecordCodecBuilder.create(i -> i.group(
             SimpleOptionals.STRICT_CODEC.lenientOptionalFieldOf("nested").forGetter(NestedStrictOptionals::nested)
         ).apply(i, NestedStrictOptionals::new));
+
+        private final Optional<SimpleOptionals> nested;
+
+        private NestedStrictOptionals(Optional<SimpleOptionals> nested) {
+            this.nested = nested;
+        }
+
+        public Optional<SimpleOptionals> nested() {
+            return nested;
+        }
     }
 
     @Test
@@ -729,11 +797,27 @@ public class CodecTests {
         );
     }
 
-    private record Simple(String string, int integer) {
+    private static final class Simple {
         public static final Codec<Simple> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("string").forGetter(Simple::string),
             Codec.INT.fieldOf("integer").forGetter(Simple::integer)
         ).apply(i, Simple::new));
+
+        private final String string;
+        private final int integer;
+
+        private Simple(String string, int integer) {
+            this.string = string;
+            this.integer = integer;
+        }
+
+        public String string() {
+            return string;
+        }
+
+        public int integer() {
+            return integer;
+        }
     }
 
     @Test

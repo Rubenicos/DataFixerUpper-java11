@@ -36,7 +36,29 @@ public abstract class Type<A> implements App<Type.Mu, A> {
     private static final Map<RewriteCacheKey, CompletableFuture<Optional<? extends RewriteResult<?, ?>>>> PENDING_REWRITE_CACHE = Maps.newConcurrentMap();
     private static final Map<RewriteCacheKey, Optional<? extends RewriteResult<?, ?>>> REWRITE_CACHE = Maps.newConcurrentMap();
 
-    private record RewriteCacheKey(Type<?> type, TypeRewriteRule rule, PointFreeRule optimizationRule) {
+    private static final class RewriteCacheKey {
+
+        private final Type<?> type;
+        private final TypeRewriteRule rule;
+        private final PointFreeRule optimizationRule;
+
+        private RewriteCacheKey(Type<?> type, TypeRewriteRule rule, PointFreeRule optimizationRule) {
+            this.type = type;
+            this.rule = rule;
+            this.optimizationRule = optimizationRule;
+        }
+
+        public Type<?> type() {
+            return type;
+        }
+
+        public TypeRewriteRule rule() {
+            return rule;
+        }
+
+        public PointFreeRule optimizationRule() {
+            return optimizationRule;
+        }
     }
 
     public static class Mu implements K1 {}

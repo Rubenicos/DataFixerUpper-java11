@@ -27,7 +27,18 @@ import java.util.Optional;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-public record RecursivePoint(int index) implements TypeTemplate {
+public final class RecursivePoint implements TypeTemplate {
+
+    private final int index;
+
+    public RecursivePoint(int index) {
+        this.index = index;
+    }
+
+    public int index() {
+        return index;
+    }
+
     @Override
     public int size() {
         return index + 1;

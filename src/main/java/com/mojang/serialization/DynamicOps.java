@@ -6,6 +6,9 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -166,9 +169,10 @@ public interface DynamicOps<T> {
         return createList(IntStream.range(0, input.capacity()).mapToObj(i -> createByte(input.get(i))));
     }
 
+    @SuppressWarnings("unchecked")
     default DataResult<IntStream> getIntStream(final T input) {
         return getStream(input).flatMap(stream -> {
-            final List<T> list = stream.toList();
+            final List<T> list = (List<T>) List.of(stream.toArray());
             if (list.stream().allMatch(element -> getNumberValue(element).isSuccess())) {
                 return DataResult.success(list.stream().mapToInt(element -> getNumberValue(element).getOrThrow().intValue()));
             }
@@ -180,9 +184,10 @@ public interface DynamicOps<T> {
         return createList(input.mapToObj(this::createInt));
     }
 
+    @SuppressWarnings("unchecked")
     default DataResult<LongStream> getLongStream(final T input) {
         return getStream(input).flatMap(stream -> {
-            final List<T> list = stream.toList();
+            final List<T> list = (List<T>) List.of(stream.toArray());
             if (list.stream().allMatch(element -> getNumberValue(element).isSuccess())) {
                 return DataResult.success(list.stream().mapToLong(element -> getNumberValue(element).getOrThrow().longValue()));
             }

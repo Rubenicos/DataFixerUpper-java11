@@ -157,14 +157,17 @@ public interface DSL {
     }
 
     static TypeTemplate and(final java.util.List<TypeTemplate> types) {
-        return switch (types.size()) {
-            case 0 -> throw new IllegalArgumentException("Must have at least one type");
-            case 1 -> types.get(0);
-            default -> and(
-                types.get(0),
-                types.subList(1, types.size()).toArray(TypeTemplate[]::new)
-            );
-        };
+        switch (types.size()) {
+            case 0:
+                throw new IllegalArgumentException("Must have at least one type");
+            case 1:
+                return types.get(0);
+            default:
+                return and(
+                        types.get(0),
+                        types.subList(1, types.size()).toArray(TypeTemplate[]::new)
+                );
+        }
     }
 
     static TypeTemplate allWithRemainder(final TypeTemplate first, final TypeTemplate... rest) {
@@ -426,17 +429,17 @@ public interface DSL {
 
     @SafeVarargs
     static TypeTemplate optionalFields(final Pair<String, TypeTemplate>... fields) {
-        return and(Stream.concat(
-            Arrays.stream(fields).map(entry -> optional(field(entry.getFirst(), entry.getSecond()))),
-            Stream.of(remainder())
-        ).toList());
+        return and(java.util.List.of((TypeTemplate[]) Stream.concat(
+                Arrays.stream(fields).map(entry -> optional(field(entry.getFirst(), entry.getSecond()))),
+                Stream.of(remainder())
+        ).toArray()));
     }
 
     static TypeTemplate optionalFieldsLazy(final Map<String, Supplier<TypeTemplate>> fields) {
-        return and(Stream.concat(
-            fields.entrySet().stream().map(entry -> optional(field(entry.getKey(), entry.getValue().get()))),
-            Stream.of(remainder())
-        ).toList());
+        return and(java.util.List.of((TypeTemplate[]) Stream.concat(
+                fields.entrySet().stream().map(entry -> optional(field(entry.getKey(), entry.getValue().get()))),
+                Stream.of(remainder())
+        ).toArray()));
     }
 
     // Type matchers
@@ -477,7 +480,30 @@ public interface DSL {
 
         private static final Map<TaggedChoiceCacheKey<?>, Type<? extends Pair<?, ?>>> TAGGED_CHOICE_TYPE_CACHE = Maps.newConcurrentMap();
 
-        public record TaggedChoiceCacheKey<K>(String name, Type<K> keyType, Map<K, ? extends Type<?>> types) {
+        public static final class TaggedChoiceCacheKey<K> {
+
+            private final String name;
+            private final Type<K> keyType;
+            private final Map<K, ? extends Type<?>> types;
+
+            public TaggedChoiceCacheKey(String name, Type<K> keyType, Map<K, ? extends Type<?>> types) {
+                this.name = name;
+                this.keyType = keyType;
+                this.types = types;
+            }
+
+            public String name() {
+                return name;
+            }
+
+            public Type<K> keyType() {
+                return keyType;
+            }
+
+            public Map<K, ? extends Type<?>> types() {
+                return types;
+            }
+
             public TaggedChoice.TaggedChoiceType<K> build() {
                 return new TaggedChoice.TaggedChoiceType<>(name, keyType, new Object2ObjectOpenHashMap<>(types));
             }

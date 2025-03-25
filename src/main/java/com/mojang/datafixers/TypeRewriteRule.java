@@ -212,14 +212,42 @@ public interface TypeRewriteRule {
         }
     }
 
-    record One(TypeRewriteRule rule) implements TypeRewriteRule {
+    final class One implements TypeRewriteRule {
+
+        private final TypeRewriteRule rule;
+
+        public One(TypeRewriteRule rule) {
+            this.rule = rule;
+        }
+
+        public TypeRewriteRule rule() {
+            return rule;
+        }
+
         @Override
         public <A> Optional<RewriteResult<A, ?>> rewrite(final Type<A> type) {
             return type.one(rule);
         }
     }
 
-    record CheckOnce(TypeRewriteRule rule, Consumer<Type<?>> onFail) implements TypeRewriteRule {
+    final class CheckOnce implements TypeRewriteRule {
+
+        private final TypeRewriteRule rule;
+        private final Consumer<Type<?>> onFail;
+
+        public CheckOnce(TypeRewriteRule rule, Consumer<Type<?>> onFail) {
+            this.rule = rule;
+            this.onFail = onFail;
+        }
+
+        public TypeRewriteRule rule() {
+            return rule;
+        }
+
+        public Consumer<Type<?>> onFail() {
+            return onFail;
+        }
+
         @Override
         public <A> Optional<RewriteResult<A, ?>> rewrite(final Type<A> type) {
             final Optional<RewriteResult<A, ?>> result = rule.rewrite(type);

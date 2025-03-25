@@ -26,7 +26,29 @@ final class Fold<A, B> extends PointFree<Function<A, B>> {
     private static final Map<HmapCacheKey, IntFunction<RewriteResult<?, ?>>> HMAP_CACHE = Maps.newConcurrentMap();
     private static final Map<Pair<IntFunction<RewriteResult<?, ?>>, Integer>, RewriteResult<?, ?>> HMAP_APPLY_CACHE = Maps.newConcurrentMap();
 
-    private record HmapCacheKey(RecursiveTypeFamily family, RecursiveTypeFamily newFamily, Algebra algebra) {
+    private static final class HmapCacheKey {
+
+        private final RecursiveTypeFamily family;
+        private final RecursiveTypeFamily newFamily;
+        private final Algebra algebra;
+
+        private HmapCacheKey(RecursiveTypeFamily family, RecursiveTypeFamily newFamily, Algebra algebra) {
+            this.family = family;
+            this.newFamily = newFamily;
+            this.algebra = algebra;
+        }
+
+        public RecursiveTypeFamily family() {
+            return family;
+        }
+
+        public RecursiveTypeFamily newFamily() {
+            return newFamily;
+        }
+
+        public Algebra algebra() {
+            return algebra;
+        }
     }
 
     protected final RecursivePoint.RecursivePointType<A> aType;

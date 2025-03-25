@@ -152,7 +152,18 @@ public abstract class MapCodec<A> extends CompressorHolder implements MapDecoder
         };
     }
 
-    public record MapCodecCodec<A>(MapCodec<A> codec) implements Codec<A> {
+    public static class MapCodecCodec<A> implements Codec<A> {
+
+        private final MapCodec<A> codec;
+
+        public MapCodecCodec(MapCodec<A> codec) {
+            this.codec = codec;
+        }
+
+        public MapCodec<A> codec() {
+            return codec;
+        }
+
         @Override
         public <T> DataResult<Pair<A, T>> decode(final DynamicOps<T> ops, final T input) {
             return codec.compressedDecode(ops, input).map(r -> Pair.of(r, input));

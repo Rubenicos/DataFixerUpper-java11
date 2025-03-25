@@ -67,7 +67,8 @@ public interface PointFreeRule {
             if (expr instanceof Bang) {
                 return Optional.empty();
             }
-            if (expr.type() instanceof Func<?, ?> func) {
+            if (expr.type() instanceof Func) {
+                final Func<?, ?> func = (Func<?, ?>) expr.type();
                 if (func.second() instanceof EmptyPart) {
                     return Optional.of((PointFree<A>) Functions.bang(func.first()));
                 }
@@ -83,7 +84,8 @@ public interface PointFreeRule {
         @SuppressWarnings("unchecked")
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
-            if (expr instanceof Apply<?, A> apply) {
+            if (expr instanceof Apply) {
+                final Apply<?, A> apply = (Apply<?, A>) expr;
                 final PointFree<? extends Function<?, A>> func = apply.func;
                 if (func instanceof ProfunctorTransformer<?, ?, ?, ?> && Functions.isId(apply.arg)) {
                     return Optional.of((PointFree<A>) Functions.id(((Func<?, ?>) apply.type()).first()));
@@ -99,8 +101,10 @@ public interface PointFreeRule {
         // (ap f1 (ap f2 arg)) -> (ap (f1 ◦ f2) arg)
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
-            if (expr instanceof final Apply<?, ?> applyFirst) {
-                if (applyFirst.arg instanceof final Apply<?, ?> applySecond) {
+            if (expr instanceof Apply) {
+                final Apply<?, ?> applyFirst = (Apply<?, ?>) expr;
+                if (applyFirst.arg instanceof Apply) {
+                    final Apply<?, ?> applySecond = (Apply<?, ?>) applyFirst.arg;
                     return Optional.of(Functions.app(compose(applyFirst.func, applySecond.func), applySecond.arg));
                 }
             }
@@ -110,7 +114,9 @@ public interface PointFreeRule {
         @SuppressWarnings("unchecked")
         private <A, B, C> PointFree<Function<A, C>> compose(final PointFree<? extends Function<?, ?>> first, final PointFree<? extends Function<?, ?>> second) {
             // Optic[o1] ◦ Optic[o2] -> Optic[o1 ◦ o2]
-            if (first instanceof ProfunctorTransformer<?, ?, ?, ?> firstOptic && second instanceof ProfunctorTransformer<?, ?, ?, ?> secondOptic) {
+            if (first instanceof ProfunctorTransformer && second instanceof ProfunctorTransformer) {
+                final ProfunctorTransformer<?, ?, ?, ?> firstOptic = (ProfunctorTransformer<?, ?, ?, ?>) first;
+                final ProfunctorTransformer<?, ?, ?, ?> secondOptic = (ProfunctorTransformer<?, ?, ?, ?>) second;
                 return cap(firstOptic, secondOptic);
             }
             return Functions.comp((PointFree<Function<B, C>>) first, (PointFree<Function<A, B>>) second);
@@ -139,7 +145,8 @@ public interface PointFreeRule {
         @Override
         @SuppressWarnings("unchecked")
         default <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
-            if (expr instanceof final Comp<?, ?> comp) {
+            if (expr instanceof Comp) {
+                final Comp<?, ?> comp = (Comp<?, ?>) expr;
                 return rewrite(comp.functions).map(rewrite -> {
                     if (rewrite.length == 1) {
                         return (PointFree<A>) rewrite[0];
@@ -176,7 +183,8 @@ public interface PointFreeRule {
         }
 
         private static void addFirst(final Deque<PointFree<? extends Function<?, ?>>> queue, final PointFree<? extends Function<?, ?>> function) {
-            if (function instanceof Comp<?, ?> comp) {
+            if (function instanceof Comp) {
+                final Comp<?, ?> comp = (Comp<?, ?>) function;
                 for (int i = comp.functions.length - 1; i >= 0; i--) {
                     queue.addFirst(comp.functions[i]);
                 }
@@ -194,10 +202,14 @@ public interface PointFreeRule {
         // (ap π1 f)◦(ap π2 g) -> (ap π2 g)◦(ap π1 f)
         @Override
         public Optional<? extends PointFree<? extends Function<?, ?>>> doRewrite(final PointFree<? extends Function<?, ?>> first, final PointFree<? extends Function<?, ?>> second) {
-            if (first instanceof final Apply<?, ?> applyFirst && second instanceof final Apply<?, ?> applySecond) {
+            if (first instanceof Apply && second instanceof Apply) {
+                final Apply<?, ?> applyFirst = (Apply<?, ?>) first;
+                final Apply<?, ?> applySecond = (Apply<?, ?>) second;
                 final PointFree<? extends Function<?, ?>> firstFunc = applyFirst.func;
                 final PointFree<? extends Function<?, ?>> secondFunc = applySecond.func;
-                if (firstFunc instanceof final ProfunctorTransformer<?, ?, ?, ?> firstOptic && secondFunc instanceof final ProfunctorTransformer<?, ?, ?, ?> secondOptic) {
+                if (firstFunc instanceof ProfunctorTransformer && secondFunc instanceof ProfunctorTransformer) {
+                    final ProfunctorTransformer<?, ?, ?, ?> firstOptic = (ProfunctorTransformer<?, ?, ?, ?>) firstFunc;
+                    final ProfunctorTransformer<?, ?, ?, ?> secondOptic = (ProfunctorTransformer<?, ?, ?, ?>) secondFunc;
                     if (!Optics.isProj2(firstOptic.optic.outermost())) {
                         return Optional.empty();
                     }
@@ -237,10 +249,14 @@ public interface PointFreeRule {
         // (ap i1 f)◦(ap i2 g) -> (ap i2 g)◦(ap i1 f)
         @Override
         public Optional<? extends PointFree<? extends Function<?, ?>>> doRewrite(final PointFree<? extends Function<?, ?>> first, final PointFree<? extends Function<?, ?>> second) {
-            if (first instanceof final Apply<?, ?> applyFirst && second instanceof final Apply<?, ?> applySecond) {
+            if (first instanceof Apply && second instanceof Apply) {
+                final Apply<?, ?> applyFirst = (Apply<?, ?>) first;
+                final Apply<?, ?> applySecond = (Apply<?, ?>) second;
                 final PointFree<? extends Function<?, ?>> firstFunc = applyFirst.func;
                 final PointFree<? extends Function<?, ?>> secondFunc = applySecond.func;
-                if (firstFunc instanceof final ProfunctorTransformer<?, ?, ?, ?> firstOptic && secondFunc instanceof final ProfunctorTransformer<?, ?, ?, ?> secondOptic) {
+                if (firstFunc instanceof ProfunctorTransformer && secondFunc instanceof ProfunctorTransformer) {
+                    final ProfunctorTransformer<?, ?, ?, ?> firstOptic = (ProfunctorTransformer<?, ?, ?, ?>) firstFunc;
+                    final ProfunctorTransformer<?, ?, ?, ?> secondOptic = (ProfunctorTransformer<?, ?, ?, ?>) secondFunc;
                     if (!Optics.isInj2(firstOptic.optic.outermost())) {
                         return Optional.empty();
                     }
@@ -280,10 +296,14 @@ public interface PointFreeRule {
         // (ap lens f)◦(ap lens g) -> (ap lens (f ◦ g))
         @Override
         public Optional<? extends PointFree<? extends Function<?, ?>>> doRewrite(final PointFree<? extends Function<?, ?>> first, final PointFree<? extends Function<?, ?>> second) {
-            if (first instanceof final Apply<?, ?> applyFirst && second instanceof final Apply<?, ?> applySecond) {
+            if (first instanceof Apply && second instanceof Apply) {
+                final Apply<?, ?> applyFirst = (Apply<?, ?>) first;
+                final Apply<?, ?> applySecond = (Apply<?, ?>) second;
                 final PointFree<? extends Function<?, ?>> firstFunc = applyFirst.func;
                 final PointFree<? extends Function<?, ?>> secondFunc = applySecond.func;
-                if (firstFunc instanceof final ProfunctorTransformer<?, ?, ?, ?> transformerFirst && secondFunc instanceof final ProfunctorTransformer<?, ?, ?, ?> transformerSecond) {
+                if (firstFunc instanceof ProfunctorTransformer && secondFunc instanceof ProfunctorTransformer) {
+                    final ProfunctorTransformer<?, ?, ?, ?> transformerFirst = (ProfunctorTransformer<?, ?, ?, ?>) firstFunc;
+                    final ProfunctorTransformer<?, ?, ?, ?> transformerSecond = (ProfunctorTransformer<?, ?, ?, ?>) secondFunc;
                     final var decomposedFirst = transformerFirst.optic.elements();
                     final var decomposedSecond = transformerSecond.optic.elements();
                     final int prefixSize = findCommonPrefix(decomposedFirst, decomposedSecond);
@@ -307,7 +327,7 @@ public interface PointFreeRule {
             return Optional.empty();
         }
 
-        private static int findCommonPrefix(final List<? extends TypedOptic.Element<?, ?, ?, ?>> first, final List<? extends TypedOptic.Element<?, ?, ?, ?>> second) {
+        private static int findCommonPrefix(final List<? extends TypedOptic.Element> first, final List<? extends TypedOptic.Element> second) {
             final int size = Math.min(first.size(), second.size());
             for (int i = 0; i < size; i++) {
                 if (!first.get(i).optic().equals(second.get(i).optic())) {
@@ -336,7 +356,9 @@ public interface PointFreeRule {
         @SuppressWarnings("unchecked")
         @Override
         public Optional<? extends PointFree<? extends Function<?, ?>>> doRewrite(final PointFree<? extends Function<?, ?>> first, final PointFree<? extends Function<?, ?>> second) {
-            if (first instanceof final Fold<?, ?> firstFold && second instanceof final Fold<?, ?> secondFold) {
+            if (first instanceof Fold && second instanceof Fold) {
+                final Fold<?, ?> firstFold = (Fold<?, ?>) first;
+                final Fold<?, ?> secondFold = (Fold<?, ?>) second;
                 // fold (_) ◦ fold (_)
                 final RecursiveTypeFamily family = firstFold.aType.family();
                 if (firstFold.index == secondFold.index && Objects.equals(family, secondFold.aType.family())) {
@@ -382,7 +404,9 @@ public interface PointFreeRule {
         @SuppressWarnings("unchecked")
         @Override
         public Optional<? extends PointFree<? extends Function<?, ?>>> doRewrite(final PointFree<? extends Function<?, ?>> first, final PointFree<? extends Function<?, ?>> second) {
-            if (first instanceof final Fold<?, ?> firstFold && second instanceof final Fold<?, ?> secondFold) {
+            if (first instanceof Fold && second instanceof Fold) {
+                final Fold<?, ?> firstFold = (Fold<?, ?>) first;
+                final Fold<?, ?> secondFold = (Fold<?, ?>) second;
                 // fold (_) ◦ fold (_)
                 final RecursiveTypeFamily family = firstFold.aType.family();
                 if (firstFold.index == secondFold.index && Objects.equals(family, secondFold.aType.family())) {
@@ -450,7 +474,18 @@ public interface PointFreeRule {
         return new Seq(rules);
     }
 
-    record Seq(PointFreeRule[] rules) implements PointFreeRule {
+    final class Seq implements PointFreeRule {
+
+        private final PointFreeRule[] rules;
+
+        public Seq(PointFreeRule[] rules) {
+            this.rules = rules;
+        }
+
+        public PointFreeRule[] rules() {
+            return rules;
+        }
+
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             PointFree<A> result = expr;
@@ -465,7 +500,7 @@ public interface PointFreeRule {
             if (obj == this) {
                 return true;
             }
-            return obj instanceof final Seq that && Arrays.equals(rules, that.rules);
+            return obj instanceof Seq && Arrays.equals(rules, ((Seq) obj).rules);
         }
 
         @Override
@@ -483,7 +518,24 @@ public interface PointFreeRule {
         return new Choice(rules);
     }
 
-    record Choice2(PointFreeRule first, PointFreeRule second) implements PointFreeRule {
+    final class Choice2 implements PointFreeRule {
+
+        private final PointFreeRule first;
+        private final PointFreeRule second;
+
+        public Choice2(PointFreeRule first, PointFreeRule second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public PointFreeRule first() {
+            return first;
+        }
+
+        public PointFreeRule second() {
+            return second;
+        }
+
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             final Optional<? extends PointFree<A>> view = first.rewrite(expr);
@@ -494,7 +546,18 @@ public interface PointFreeRule {
         }
     }
 
-    record Choice(PointFreeRule[] rules) implements PointFreeRule {
+    final class Choice implements PointFreeRule {
+
+        private final PointFreeRule[] rules;
+
+        public Choice(PointFreeRule[] rules) {
+            this.rules = rules;
+        }
+
+        public PointFreeRule[] rules() {
+            return rules;
+        }
+
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             for (final PointFreeRule rule : rules) {
@@ -511,7 +574,7 @@ public interface PointFreeRule {
             if (obj == this) {
                 return true;
             }
-            return obj instanceof final Choice that && Arrays.equals(rules, that.rules);
+            return obj instanceof Choice && Arrays.equals(rules, ((Choice) obj).rules);
         }
 
         @Override
@@ -532,7 +595,18 @@ public interface PointFreeRule {
         return new Once(rule);
     }
 
-    record Once(PointFreeRule rule) implements PointFreeRule {
+    final class Once implements PointFreeRule {
+
+        private final PointFreeRule rule;
+
+        public Once(PointFreeRule rule) {
+            this.rule = rule;
+        }
+
+        public PointFreeRule rule() {
+            return rule;
+        }
+
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             final Optional<? extends PointFree<A>> view = rule.rewrite(expr);
@@ -551,7 +625,24 @@ public interface PointFreeRule {
         return new Everywhere(topDown, bottomUp);
     }
 
-    record Everywhere(PointFreeRule topDown, PointFreeRule bottomUp) implements PointFreeRule {
+    final class Everywhere implements PointFreeRule {
+
+        private final PointFreeRule topDown;
+        private final PointFreeRule bottomUp;
+
+        public Everywhere(PointFreeRule topDown, PointFreeRule bottomUp) {
+            this.topDown = topDown;
+            this.bottomUp = bottomUp;
+        }
+
+        public PointFreeRule topDown() {
+            return topDown;
+        }
+
+        public PointFreeRule bottomUp() {
+            return bottomUp;
+        }
+
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             final PointFree<A> topDown = this.topDown.rewriteOrNop(expr);
@@ -561,21 +652,52 @@ public interface PointFreeRule {
         }
     }
 
-    record All(PointFreeRule rule) implements PointFreeRule {
+    final class All implements PointFreeRule {
+
+        private final PointFreeRule rule;
+
+        public All(PointFreeRule rule) {
+            this.rule = rule;
+        }
+
+        public PointFreeRule rule() {
+            return rule;
+        }
+
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             return expr.all(rule);
         }
     }
 
-    record One(PointFreeRule rule) implements PointFreeRule {
+    final class One implements PointFreeRule {
+
+        private final PointFreeRule rule;
+
+        public One(PointFreeRule rule) {
+            this.rule = rule;
+        }
+
+        public PointFreeRule rule() {
+            return rule;
+        }
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             return expr.one(rule);
         }
     }
 
-    record Many(PointFreeRule rule) implements PointFreeRule {
+    final class Many implements PointFreeRule {
+
+        private final PointFreeRule rule;
+
+        public Many(PointFreeRule rule) {
+            this.rule = rule;
+        }
+
+        public PointFreeRule rule() {
+            return rule;
+        }
         @Override
         public <A> Optional<? extends PointFree<A>> rewrite(final PointFree<A> expr) {
             Optional<? extends PointFree<A>> result = Optional.of(expr);
